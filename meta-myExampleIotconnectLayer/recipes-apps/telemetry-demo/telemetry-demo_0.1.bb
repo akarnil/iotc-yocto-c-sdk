@@ -5,6 +5,8 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 
 DEPENDS += " iotc-c-sdk"
 RDEPENDS:${PN} += " iotc-c-telemetry-demo-service"
+RDEPENDS:${PN} += " bash"
+RDEPENDS:${PN}-dev += " bash"
 PROVIDES = "${PN} ${PN}-dev"
 
 SRC_URI = "file://cmke-src; \
