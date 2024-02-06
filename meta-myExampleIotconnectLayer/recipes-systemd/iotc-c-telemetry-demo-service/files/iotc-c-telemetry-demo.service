@@ -7,7 +7,7 @@ StartLimitBurst=5
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/local/iotc/telemetry-demo /usr/local/iotc/config.json
+ExecStart=/usr/bin/iotc/app/iotc-demo /usr/bin/iotc/local/config.json
 Restart=always
 RestartSec=30
 StandardOutput=journal+console

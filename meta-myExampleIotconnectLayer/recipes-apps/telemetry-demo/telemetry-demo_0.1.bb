@@ -20,11 +20,12 @@ inherit cmake
 
 PACKAGES = "${PN} ${PN}-dev ${PN}-dbg ${PN}-staticdev"
 
-APP_INSTALL_DIR = "${base_prefix}/usr/bin/local/iotc"
-PRIVATE_DATA_DIR = "${base_prefix}/usr/local/iotc"
+APP_INSTALL_DIR = "${base_prefix}/usr/bin/iotc/app"
+PRIVATE_DATA_DIR = "${base_prefix}/usr/bin/iotc/local"
 
 FILES:${PN}-dev = "${PRIVATE_DATA_DIR}/* \
 "
+FILES:${PN} += "${APP_INSTALL_DIR}/*"
 
 cmake_do_generate_toolchain_file:append() {
 	cat >> ${WORKDIR}/toolchain.cmake <<EOF
@@ -41,13 +42,18 @@ EOF
 
 do_install() {
     install -d ${D}${APP_INSTALL_DIR}
-    install -m 0755 telemetry-demo ${D}${APP_INSTALL_DIR}
+    install -m 0755 iotc-demo ${D}${APP_INSTALL_DIR}
 
-    install -d ${D}${PRIVATE_DATA_DIR}
-    for f in ${WORKDIR}/eg-private-repo-data/*
-    do
-        if [ -f $f ]; then
-            install -m 0755 $f ${D}${PRIVATE_DATA_DIR}/
-        fi
-    done
+    # install -d ${D}${PRIVATE_DATA_DIR}
+    # for f in ${WORKDIR}/eg-private-repo-data/*
+    # do
+    #     if [ -f $f ]; then
+    #         install -m 0755 $f ${D}${PRIVATE_DATA_DIR}/
+    #     fi
+    # done
+
+    if [ ! -d ${D}${PRIVATE_DATA_DIR} ]; then
+        install -d ${D}${PRIVATE_DATA_DIR}
+    fi
+    cp -R --no-preserve=ownership ${WORKDIR}/eg-private-repo-data/* ${D}${PRIVATE_DATA_DIR}/
 }
