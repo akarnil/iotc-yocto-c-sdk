@@ -9,7 +9,7 @@ RDEPENDS:${PN} += " bash"
 RDEPENDS:${PN}-dev += " bash"
 PROVIDES = "${PN} ${PN}-dev"
 
-SRC_URI = "file://cmke-src; \
+SRC_URI = "file://src; \
 file://eg-private-repo-data \
 file://scripts \
 "
@@ -17,7 +17,7 @@ file://scripts \
 SRCREV_FORMAT="machine_meta"
 SRCREV="${AUTOREV}"
 
-S="${WORKDIR}/cmke-src"
+S="${WORKDIR}/src"
 
 inherit cmake
 
