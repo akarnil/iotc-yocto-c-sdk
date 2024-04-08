@@ -12,7 +12,7 @@ DEPENDS = "curl \
 "
 
 # Where to find source files (can be local, GitHub, etc.)
-SRC_URI = "git://github.com/avnet-iotconnect/iotc-generic-c-sdk.git;\
+SRC_URI = "gitsm://github.com/avnet-iotconnect/iotc-generic-c-sdk.git;\
 protocol=https;\
 branch=main;\
 destsuffix=${C};\
@@ -42,12 +42,12 @@ branch=master;\
 destsuffix=${C}/lib/paho.mqtt.c/;\
 "
 
-SRC_URI += "file://0001_CMake_findPackage.patch;\
+SRC_URI += "file://0001-curl-patch.patch;\
 patchdir=${C};\
 "
 
 SRCREV_FORMAT="machine_meta"
-SRCREV="${AUTOREV}"
+SRCREV = "${AUTOREV}"
 
 # Where to keep downloaded source files (in tmp/work/...)
 C="${WORKDIR}/git"
