@@ -7,14 +7,14 @@ DEPENDS += " iotc-c-sdk"
 RDEPENDS:${PN} += " iotc-c-telemetry-demo-service"
 PROVIDES = "${PN} ${PN}-dev"
 
-SRC_URI = "file://cmke-src; \
+SRC_URI = "file://src; \
 file://eg-private-repo-data \
 "
 
 SRCREV_FORMAT="machine_meta"
 SRCREV="${AUTOREV}"
 
-S="${WORKDIR}/cmke-src"
+S="${WORKDIR}/src"
 
 inherit cmake
 
