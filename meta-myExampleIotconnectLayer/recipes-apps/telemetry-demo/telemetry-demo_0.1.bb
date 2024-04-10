@@ -4,11 +4,12 @@ LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
 DEPENDS += " iotc-c-sdk"
-RDEPENDS:${PN} += " iotc-c-telemetry-demo-service"
+RDEPENDS:${PN} += " iotc-c-telemetry-demo-service bash"
 PROVIDES = "${PN} ${PN}-dev"
 
 SRC_URI = "file://src; \
 file://eg-private-repo-data \
+file://scripts \
 "
 
 SRCREV_FORMAT="machine_meta"
@@ -42,12 +43,20 @@ EOF
 do_install() {
     install -d ${D}${APP_INSTALL_DIR}
     install -m 0755 telemetry-demo ${D}${APP_INSTALL_DIR}
+    
+    if [ ! -d ${D}${PRIVATE_DATA_DIR} ]; then
+        install -d ${D}${PRIVATE_DATA_DIR}
+    fi
+    cp -R --no-preserve=ownership ${WORKDIR}/eg-private-repo-data/* ${D}${PRIVATE_DATA_DIR}/
 
-    install -d ${D}${PRIVATE_DATA_DIR}
-    for f in ${WORKDIR}/eg-private-repo-data/*
+    # Add command scripts
+    for f in ${WORKDIR}/scripts/*
     do
         if [ -f $f ]; then
-            install -m 0755 $f ${D}${PRIVATE_DATA_DIR}/
+            if [ ! -d ${D}${APP_INSTALL_DIR}/scripts ]; then
+                install -d ${D}${APP_INSTALL_DIR}/scripts
+            fi
+            install -m 0755 $f ${D}${APP_INSTALL_DIR}/scripts/
         fi
     done
 }

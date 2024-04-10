@@ -35,7 +35,7 @@
 #define FREE(x) if ((x)) { free(x); (x) = NULL; }
 #define REPEAT_SENT_TELEMETRY
 
-char json_path[4096] = {};
+char* json_path = NULL;
 
 
 char device_id[256] = {};
@@ -316,6 +316,7 @@ static int parse_raw_json_to_string(char* output, const char * const raw_json_st
     }
 
     cJSON_Delete(json);
+    printf("failed to get %s from json\n", key);
     return EXIT_FAILURE;
 }
 
@@ -345,12 +346,20 @@ int main(int argc, char *argv[]) {
     telemetry_attribute_t* telemetry = NULL; 
     
 
-    // need to pull the json path from argv
 
-    // if (argc == 2) {};
+    if (argc != 2)
+    {
+        printf("json file not provided; Aborting\n");
+        return EXIT_FAILURE;
+    }
 
-    char json[] = "/home/akarnil/work/iotc-generic-c-sdk/samples/basic-sample/config.json";
-    strncpy(json_path,json,strlen(json));
+    if (!string_ends_with(".json", argv[1]))
+    {
+        printf("File extension is not .json of filename %s\n", argv[1]);
+        return EXIT_FAILURE;
+    }
+    json_path = argv[1];
+
 
     if (access(json_path, F_OK) != 0)
     {
@@ -587,7 +596,7 @@ int main(int argc, char *argv[]) {
 
     ret = iotconnect_sdk_connect();
     if (0 != ret) {
-        printf("iotconnect_sdk_init() exited with error code %d\n", ret);
+        printf("iotconnect_sdk_connect() exited with error code %d\n", ret);
         return ret;
     }
 
