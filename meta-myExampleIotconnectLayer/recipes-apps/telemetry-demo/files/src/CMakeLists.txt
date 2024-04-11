@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(telemetry-demo)
 
 # don't know how to best do this. The intent is to add our include path and the define in order to pick up iotcl_config.h
-add_compile_options(-DIOTCL_USER_CONFIG_FILE=\"iotcl_config.h\" -I${CMAKE_CURRENT_SOURCE_DIR}/)
+# add_compile_options(-DIOTCL_USER_CONFIG_FILE=\"iotcl_config.h\" -I${CMAKE_CURRENT_SOURCE_DIR}/)
 
 # add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../iotc-generic-c-sdk SdkSources)
 add_subdirectory(${IOTC_C_SDK_DIR} SdkSources)

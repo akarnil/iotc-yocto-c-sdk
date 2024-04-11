@@ -30,14 +30,45 @@
 #include <unistd.h>
 #endif
 
+/* The specification states different values which differ from the actual values and behavior
+ * accepted by the back end. If/when the back end changes to comply with the documentation,
+ * define IOTCL_C2D_ACK_USES_SPEC in your iotcl_config.h to use values defined by the documentation.
+ */
+// #define IOTCL_C2D_ACK_USES_SPEC
+
+//Temporary workaround for discovery response is erroneously reporting that your subscription has expired.
+#define IOTCL_DRA_DISCOVERY_IGNORE_SUBSCRIPTION_EXPIRED
+
+
+// See iotc_log.h for more information about configuring logging
+
+#define IOTCL_ENDLN "\n"
+/*
+#define IOTCL_FATAL(err_code, ...) \
+    do { \
+        printf("IOTCL FATAL (%d): ", err_code); printf(__VA_ARGS__); printf(IOTCL_ENDLN); \
+    } while(0)
+
+#define IOTCL_ERROR(err_code, ...) \
+    do { \
+        (void)(err_code); \
+        printf("IOTCL ERROR (%d): ", err_code); printf(__VA_ARGS__); printf(IOTCL_ENDLN); \
+    } while(0)
+
+#define IOTCL_WARN(err_code, ...) \
+    do { \
+        (void)(err_code); \
+        printf("IOTCL WARN (%d): ", err_code); printf(__VA_ARGS__); printf(IOTCL_ENDLN); \
+    } while(0)
+*/
+
+
 #define APP_VERSION "00.01.00"
 #define STRINGS_ARE_EQUAL 0
 #define FREE(x) if ((x)) { free(x); (x) = NULL; }
 #define REPEAT_SENT_TELEMETRY
 
 char* json_path = NULL;
-
-
 char device_id[256] = {};
 char company_id[256] = {};
 char environment[256] = {};
@@ -52,7 +83,6 @@ char commands_list_path[4096] = {};
 
 char** available_scripts = NULL;
 int available_scripts_count = 0;
-
 
 
 typedef struct telemetry_attribute
@@ -334,8 +364,56 @@ static int parse_json_to_string(char* output, cJSON* json, char* key)
     return EXIT_FAILURE;
 }
 
+static int init_scripts()
+{
 
+    if (access(commands_list_path, F_OK) != 0)
+    {
+        printf("failed to access scripts path - %s ; Aborting\n", commands_list_path);
+        return EXIT_FAILURE;
+    }
 
+    DIR *dir;
+    struct dirent *entry;
+    if ((dir = opendir(commands_list_path)) == NULL)
+    {
+        perror("opendir() error");
+    }
+
+    // Get the total scripts count
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (strcmp( entry->d_name, ".") == STRINGS_ARE_EQUAL || strcmp( entry->d_name, "..") == STRINGS_ARE_EQUAL)
+        {
+            continue;
+        }
+    available_scripts_count++;
+    }
+    closedir(dir);
+
+    // Re-read the dir to reset to seek back to the start
+    if ((dir = opendir(commands_list_path)) == NULL)
+    {
+        perror("opendir() error");
+    }
+
+    available_scripts = calloc(available_scripts_count, sizeof(char*));
+
+    int itr = 0;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (strcmp( entry->d_name, ".") == STRINGS_ARE_EQUAL || strcmp( entry->d_name, "..") == STRINGS_ARE_EQUAL)
+        {
+            continue;
+        }
+        available_scripts[itr] = calloc(strlen(entry->d_name), sizeof(char));       
+        strncpy(available_scripts[itr], entry->d_name, strlen(entry->d_name));
+        itr++;
+    }
+    closedir(dir);
+
+    return EXIT_SUCCESS;
+}
 
 
 int main(int argc, char *argv[]) {
@@ -345,7 +423,6 @@ int main(int argc, char *argv[]) {
 
     telemetry_attribute_t* telemetry = NULL; 
     
-
 
     if (argc != 2)
     {
@@ -447,7 +524,13 @@ int main(int argc, char *argv[]) {
         config.auth_info.data.cert_info.device_key = client_key;
 
     } else if (strcmp(auth_type, "IOTC_AT_SYMMETRIC_KEY") == STRINGS_ARE_EQUAL){
-        config.auth_info.type= IOTC_AT_SYMMETRIC_KEY;
+        char primary_key[256] = {};
+
+        cJSON* params_parser = cJSON_GetObjectItemCaseSensitive(auth_parser, "params");
+        parsing_result += parse_json_to_string(primary_key, params_parser, "primary_key");
+        cJSON_free(params_parser);
+
+        config.auth_info.data.symmetric_key = primary_key;
     } else if (strcmp(auth_type, "IOTC_AT_TPM") == STRINGS_ARE_EQUAL) {
         // config.auth_info.type= IOTC_AT_TPM;
     } else if (strcmp(auth_type, "IOTC_AT_TOKEN") == STRINGS_ARE_EQUAL) {
@@ -495,67 +578,19 @@ int main(int argc, char *argv[]) {
         telem_ptr++;
     }
 
-    printf("%s\n", commands_list_path);
     cJSON_free(attributes_parser);
     cJSON_free(device_parser);
     cJSON_free(auth_parser);
     cJSON_free(json_parser);
-
-
-
-    printf("%s\n", device_id);
     free(json_str);
 
-
-    if (access(commands_list_path, F_OK) != 0)
+    if (init_scripts() != 0)
     {
-        printf("failed to access scripts path - %s ; Aborting\n", commands_list_path);
         return EXIT_FAILURE;
     }
 
-    DIR *dir;
-    struct dirent *entry;
-    if ((dir = opendir(commands_list_path)) == NULL)
-    {
-        perror("opendir() error");
-    }
-
-    // Get the total scripts count
-    while ((entry = readdir(dir)) != NULL)
-    {
-        if (strcmp( entry->d_name, ".") == STRINGS_ARE_EQUAL || strcmp( entry->d_name, "..") == STRINGS_ARE_EQUAL)
-        {
-            continue;
-        }
-    available_scripts_count++;
-    }
-    closedir(dir);
-
-    // Re-read the dir to reset to seek back to the start
-    if ((dir = opendir(commands_list_path)) == NULL)
-    {
-        perror("opendir() error");
-    }
-
-    available_scripts = calloc(available_scripts_count, sizeof(char*));
-
-    int itr = 0;
-    while ((entry = readdir(dir)) != NULL)
-    {
-        if (strcmp( entry->d_name, ".") == STRINGS_ARE_EQUAL || strcmp( entry->d_name, "..") == STRINGS_ARE_EQUAL)
-        {
-            continue;
-        }
-        available_scripts[itr] = calloc(strlen(entry->d_name), sizeof(char));       
-        strncpy(available_scripts[itr], entry->d_name, strlen(entry->d_name));
-        itr++;
-    }
-    closedir(dir);
 
 
-
-
-    // char *trust_store;
 
     (void) argc;
     (void) argv;
@@ -566,20 +601,6 @@ int main(int argc, char *argv[]) {
     config.connection_type = connection_type;
     config.auth_info.trust_store = iotc_server_cert_path;
     config.verbose = true;
-
-
-    // if (config.auth_info.type == IOTC_AT_X509) {
-    //     config.auth_info.data.cert_info.device_cert = IOTCONNECT_DEVICE_CERT;
-    //     config.auth_info.data.cert_info.device_key = IOTCONNECT_DEVICE_PRIVATE_KEY;
-    // } else if (config.auth_info.type == IOTC_AT_SYMMETRIC_KEY){
-    //     config.auth_info.data.symmetric_key = IOTCONNECT_SYMMETRIC_KEY;
-    // } else {
-    //     // none of the above
-    //     printf("Unknown IotConnectAuthType\n");
-    //     return -1;
-    // }
-
-
     config.status_cb = on_connection_status;
     config.ota_cb = on_ota;
     config.cmd_cb = on_command;
@@ -615,7 +636,7 @@ int main(int argc, char *argv[]) {
     // free attributes
     for (int i = 0; i < number_of_attributes; i++)
     {
-        printf("%s %s\n", telemetry[i].name, telemetry[i].path);
+        // printf("%s %s\n", telemetry[i].name, telemetry[i].path);
         free(telemetry[i].name);
         free(telemetry[i].path);
     }
