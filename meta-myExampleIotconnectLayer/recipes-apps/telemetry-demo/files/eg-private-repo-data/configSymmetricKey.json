@@ -11,7 +11,7 @@
     "env": "",
 
     "_comment_iotc_server_cert":"Path to Global root cert, different depending on AWS/Azure instance",
-    "iotc_server_cert": "",
+    "iotc_server_cert": "/etc/ssl/certs/...",
 
     "_comment_sdk_id": "'SDK Identities -> Language: Python **, Version: 1.0' from portal's Key Vault, needed for Python SDK",
     
