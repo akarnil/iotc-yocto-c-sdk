@@ -4,7 +4,8 @@ LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
 DEPENDS += " iotc-c-sdk"
-RDEPENDS:${PN} += " iotc-c-telemetry-demo-service bash"
+RDEPENDS:${PN} += " bash"
+RDEPENDS:${PN} += " iotc-c-telemetry-demo-service"
 PROVIDES = "${PN} ${PN}-dev"
 
 SRC_URI = "file://src; \
@@ -42,7 +43,7 @@ EOF
 
 do_install() {
     install -d ${D}${APP_INSTALL_DIR}
-    install -m 0755 telemetry-demo ${D}${APP_INSTALL_DIR}
+    install -m 0755 iotc-c-telemetry-demo ${D}${APP_INSTALL_DIR}
     
     if [ ! -d ${D}${PRIVATE_DATA_DIR} ]; then
         install -d ${D}${PRIVATE_DATA_DIR}
