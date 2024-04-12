@@ -31,7 +31,7 @@
         }
     },
     "device": {
-        "commands_list_path": "/usr/iotc-c/app/iotc/scripts",
+        "commands_list_path": "/usr/iotc-c/app/scripts",
         "attributes": [
             {
                 "name": "example",
