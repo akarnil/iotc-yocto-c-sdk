@@ -30,7 +30,7 @@
         }
     },
     "device": {
-        "commands_list_path": "/usr/bin/local/iotc/scripts",
+        "commands_list_path": "/usr/iotc-c/app/iotc/scripts",
         "attributes": [
             {
                 "name": "example",

@@ -12,17 +12,16 @@ This layer draws in the various sources required to utilise the SDK. From a yoct
 iotc-yocto-c-sdk$ tree meta-iotconnect/
 meta-iotconnect/
 ├── conf
-│   └── layer.conf
+│   └── layer.conf
 └── recipes-apps
     └── iotConnect
         ├── files
-        │   └── 0001_CMake_findPackage.patch
-        ├── iotc-c-sdk_0.1.bb
-        └── iotc-c-sdk_1.0.bb
+        │   └── 0001-curl-fix.patch
+        └── iotc-c-sdk_git.bb
 ```
 
 ### `meta-myExampleIotconnectLayer`
-This layer provides an example of how a user might write a recipe suitable for their application. It contains a simple application that demonstrates telemetry. Once installed on the image it can be started by logging in & executing `/usr/bin/local/iotc/telemetry-demo /path/to/config.json` where `config.json` is a file that contains device authentication information and paths to where telemetry-demo will read data from on the host device. It's expected that in the 1st instance a user would run this demo on their hardware after editing a sample `config.json` to reflect a device they've defined on iotconnect.io and sensor data particular to their hardware.
+This layer provides an example of how a user might write a recipe suitable for their application. It contains a simple application that demonstrates telemetry and commands. Once installed on the image it can be started by logging in & executing `/usr/iotc-c/app/iotc/telemetry-demo /path/to/config.json` where `config.json` is a file that contains device authentication information and paths to where telemetry-demo will read data from on the host device. It's expected that in the 1st instance a user would run this demo on their hardware after editing a sample `config.json` to reflect a device they've defined on iotconnect.io and sensor data particular to their hardware.
 
 By adding the recipe to your image (e.g. `IMAGE_INSTALL += " telemetry-demo"` in `conf/local.conf`)
 
@@ -44,13 +43,37 @@ meta-myExampleIotconnectLayer/
         │       ├── config-symmtrcKy.json
         │       └── config-x509.json
         └── telemetry-demo_0.1.bb <-------- Recipe
+
+├── conf
+│   └── layer.conf
+├── recipes-apps
+│   └── telemetry-demo <-------------------- Recipe directory
+│       ├── files
+│       │   ├── eg-private-repo-data <----- Location for provisioning configuration files.
+│       │   │   ├── certs <----- Location for certificates/keys.
+│       │   │   ├── configSymmetricKey.json
+│       │   │   └── configX509.json
+│       │   ├── scripts <----- Location for executable scripts that run as commands.
+│       │   │   └── control_led.sh
+│       │   └── src <------------------ Demo CMake project directory
+│       │       ├── CMakeLists.txt
+│       │       ├── iotcl_config.h
+│       │       └── main.c
+│       └── iotc-c-telemetry-demo_0.1.bb <----- Main recipe
+└── recipes-systemd
+    └── iotc-c-telemetry-demo-service
+        ├── files
+        │   └── iotc-c-telemetry-demo.service
+        └── iotc-c-telemetry-demo-service_0.1.bb
+
 ```
 
-As developing a iotc application involves the use of private/secure data like keys/certificates and the user is expected to develop same application using SCM like git, it's worth taking a moment to be aware of risks of accidentlally uploading private data to places it shouldnt belong. The directory `eg-priviate-repo-data` seeks to provide a safe space to place sensitive data like device keys etc for development purposes only. When the user installs the _development_ version of the recipe (e.g. `IMAGE_INSTALL += " telemetry-demo-dev"` in `conf/local.conf`) any files within `eg-private-repo-data` will be installed in the rootfs of the image. The `.gitignore` settings for this repo are also configured to prevent accidental upload of *.pem or *.crt files.
+As developing a iotc application involves the use of private/secure data like keys/certificates and the user is expected to develop same application using SCM like git, it's worth taking a moment to be aware of risks of accidentlally uploading private data to places it shouldnt belong. The directory `eg-priviate-repo-data` seeks to provide a safe space to place sensitive data like device keys etc for development purposes only. When the user installs the _development_ version of the recipe (`telemetry-demo-dev`) any files within `eg-private-repo-data` will be installed in the rootfs of the image. The `.gitignore` settings for this repo are also configured to prevent accidental upload of *.pem or *.crt files.
 
 This approach allows the user to develop their solution conveniently, then when it's time to provide production builds, the result would be a clean installation awaiting first time configuration post image flash.
 
-Also in the `eg-private-repo-data` are sample JSON files, these are explained in more detail in the drop-down section below..
+Also in the `eg-private-repo-data` are sample JSON files, these are explained in more detail in the drop-down section
+
 
 <details>
   <summary>JSON config files</summary>
@@ -80,12 +103,12 @@ Also in the `eg-private-repo-data` are sample JSON files, these are explained in
       "attributes": [
         {
           "name": "power",
-          "private_data": "/usr/bin/local/iotc/dummy_sensor_power",
+          "private_data": "/usr/iotc-c/app/iotc/dummy_sensor_power",
           "private_data_type": "ascii"
         },
         {
           "name": "level",
-          "private_data": "/usr/bin/local/iotc/dummy_sensor_level",
+          "private_data": "/usr/iotc-c/app/iotc/dummy_sensor_level",
           "private_data_type": "ascii"
         }
       ]
@@ -124,7 +147,7 @@ To include the layers within a yocto enviroment:
 
 1. Flash the resultant image to the device.
 
-2. Login into the device & run the command `/usr/bin/local/iotc/telemetry-demo /usr/local/iotc/config.json`
+2. Login into the device & run the command `/usr/iotc-c/app/iotc/telemetry-demo /usr/iotc-c/local/config.json`
 
 ***Note***: you might need adding lines below to your image
 ```

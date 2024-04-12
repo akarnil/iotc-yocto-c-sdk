@@ -22,11 +22,13 @@ inherit cmake
 
 PACKAGES = "${PN} ${PN}-dev ${PN}-dbg ${PN}-staticdev"
 
-APP_INSTALL_DIR = "${base_prefix}/usr/bin/local/iotc"
-PRIVATE_DATA_DIR = "${base_prefix}/usr/local/iotc"
+APP_INSTALL_DIR = "${base_prefix}/usr/iotc-c/app"
+PRIVATE_DATA_DIR = "${base_prefix}/usr/iotc-c/local"
 
 FILES:${PN}-dev = "${PRIVATE_DATA_DIR}/* \
 "
+
+FILES:${PN} += "${APP_INSTALL_DIR}/*"
 
 cmake_do_generate_toolchain_file:append() {
 	cat >> ${WORKDIR}/toolchain.cmake <<EOF

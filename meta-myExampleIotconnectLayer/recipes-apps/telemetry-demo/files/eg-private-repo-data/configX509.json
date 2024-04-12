@@ -26,12 +26,12 @@
     "auth": {
         "auth_type": "IOTC_AT_X509",
             "params": {
-                "client_key": "/usr/local/iotc/certs/device.key",
-                "client_cert": "/usr/local/iotc/certs/DeviceCertificate.pem"
+                "client_key": "/usr/iotc-c/local/certs/device.key",
+                "client_cert": "/usr/iotc-c/local/certs/DeviceCertificate.pem"
         }
     },
     "device": {
-        "commands_list_path": "/usr/bin/local/iotc/scripts",
+        "commands_list_path": "/usr/iotc-c/app/iotc/scripts",
         "attributes": [
             {
                 "name": "example",
