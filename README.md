@@ -6,7 +6,7 @@
 ## Layers
 There are 2 layers thus far: `meta-iotconnect` & `meta-myExampleIotconnectLayer`.
 ### `meta-iotconnect`
-This layer draws in the various sources required to utilise the SDK. From a yocto perspective it largely serves to provide the sources to other recipes that produce executables e.g. `DEPENDS += "iotc-c-sdk"` will be present in said recipe.
+This layer draws in the various sources required to utilize the SDK. From a yocto perspective it largely serves to provide the sources to other recipes that produce executables e.g. `DEPENDS += "iotc-c-sdk"` will be present in said recipe.
 
 ```
 iotc-yocto-c-sdk$ tree meta-iotconnect/
@@ -68,12 +68,11 @@ meta-myExampleIotconnectLayer/
 
 ```
 
-As developing a iotc application involves the use of private/secure data like keys/certificates and the user is expected to develop same application using SCM like git, it's worth taking a moment to be aware of risks of accidentlally uploading private data to places it shouldnt belong. The directory `eg-priviate-repo-data` seeks to provide a safe space to place sensitive data like device keys etc for development purposes only. When the user installs the _development_ version of the recipe (`telemetry-demo-dev`) any files within `eg-private-repo-data` will be installed in the rootfs of the image. The `.gitignore` settings for this repo are also configured to prevent accidental upload of *.pem or *.crt files.
+As developing a iotc application involves the use of private/secure data like keys/certificates and the user is expected to develop same application using SCM like git, it's worth taking a moment to be aware of risks of accidentally uploading private data to places it shouldn't belong. The directory `eg-private-repo-data` seeks to provide a safe space to place sensitive data like device keys etc for development purposes only. When the user installs the _development_ version of the recipe (`telemetry-demo-dev`) any files within `eg-private-repo-data` will be installed in the rootfs of the image. The `.gitignore` settings for this repo are also configured to prevent accidental upload of *.pem or *.crt files.
 
 This approach allows the user to develop their solution conveniently, then when it's time to provide production builds, the result would be a clean installation awaiting first time configuration post image flash.
 
 Also in the `eg-private-repo-data` are sample JSON files, these are explained in more detail in the drop-down section
-
 
 <details>
   <summary>JSON config files</summary>
@@ -130,30 +129,6 @@ Would become:
 ```
 </details>
 
-## How to include layers
-To include the layers within a yocto enviroment:
-
-1. check them out to the `sources` directory in your yocto enviroment.
-
-1. add them to `conf/bblayers` file in your build directory
-
-1. add recipes as a part of your image (for example in `<meta-my-layer>/recipes-core/images/<image-name.bb>` file) or to your local build configuration (in `local.conf` for example) - `IMAGE_INSTALL += " telemetry-demo-dev"`
-
-1. using the config.json files in `eg-private-repo-data` as a template, create your own config.json with details of the device you have setup on iotconnect.io.
-
-1. editing the same json as in the last step, edit the `attributes` section of the JSON so the `name` of the attritube maps to a path on your system where the relevant data can be found e.g. the path to the position data of an I2C accelerometer might be: `/sys/bus/i2c/devices/1-0053/position`.
-
-1. build with a bitbake call e.g. `./bitbake <image-name>`
-
-1. Flash the resultant image to the device.
-
-2. Login into the device & run the command `/usr/iotc-c/app/iotc/telemetry-demo /usr/iotc-c/local/config.json`
-
-***Note***: you might need adding lines below to your image
-```
-inherit core-image
-inherit module
-inherit extrausers
-```
+## How to include the meta layers can be found [here](board_specific_readmes/meta-layers.md)
 
 ## Board specific examples can be found [here](board_specific_readmes/README.md)
