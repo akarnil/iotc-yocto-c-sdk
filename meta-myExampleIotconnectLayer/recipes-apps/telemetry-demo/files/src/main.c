@@ -389,7 +389,6 @@ int main(int argc, char *argv[]) {
     iotconnect_sdk_init_config(&config);
 
     telemetry_attribute_t* telemetry = NULL; 
-    
 
     if (argc != 2)
     {
@@ -494,6 +493,18 @@ int main(int argc, char *argv[]) {
         parsing_result += parse_json_to_string(client_key, params_parser, "client_key");
         parsing_result += parse_json_to_string(client_cert, params_parser, "client_cert");
         cJSON_free(params_parser);
+
+    if (access(client_key, F_OK) != 0)
+    {
+        printf("failed to access client_key - %s ; Aborting\n", client_key);
+        return EXIT_FAILURE;
+    }
+
+    if (access(client_cert, F_OK) != 0)
+    {
+        printf("failed to access client_cert - %s ; Aborting\n", client_cert);
+        return EXIT_FAILURE;
+    }
 
         config.auth_info.data.cert_info.device_cert = client_cert;
         config.auth_info.data.cert_info.device_key = client_key;
